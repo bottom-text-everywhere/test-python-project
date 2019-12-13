@@ -1,9 +1,16 @@
 SHELL := $(shell command -v bash)
 
+GIT_REMOTE_URL := $(shell git config --get remote.origin.url)
+GIT_ORG := $(shell sed -E 's/^.*[:\/]([^:\/]+)\/.*$$/\1/' <<<"$(GIT_REMOTE_URL)")
+GIT_REPO := $(shell sed -E 's/^.*\/([^:\/]+)$$/\1/ ; s/\.git$$//' <<<"$(GIT_REMOTE_URL)")
+
+DOCKER_IMAGE_TAG ?= $(shell git log --pretty=format:'%H' -n 1 2>/dev/null || echo latest)
+
 .PHONY: build
 build:
-	docker build -t bottom-text-everywhere/test-python-project:latest .
+	docker build -t "$(GIT_ORG)/$(GIT_REPO):$(DOCKER_IMAGE_TAG)" .
 
+.PHONY: shell
 shell: build
 	mkdir -p .shell-files
 	touch .shell-files/.bashrc
@@ -22,4 +29,4 @@ shell: build
 		-w /workspace \
 		--entrypoint bash \
 		\
-		bottom-text-everywhere/test-python-project:latest
+		"$(GIT_ORG)/$(GIT_REPO):$(DOCKER_IMAGE_TAG)"
