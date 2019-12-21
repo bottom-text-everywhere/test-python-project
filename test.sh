@@ -32,7 +32,6 @@ declare -A err
 
 function handle_errors {
     local k
-    local v
 
     if [[ ${#err[@]} -eq 0 ]]; then
         return
@@ -43,7 +42,7 @@ function handle_errors {
     echo "the following python packages did not install correctly:"
 
     for k in "${!err[@]}"; do
-        echo " ${k}: expected ${versions[${k}]} got ${err[${k}]} instead"
+        echo " ${k}: expected ${versions["${k}"]} got ${err["${k}"]} instead"
     done
 
     echo ""
@@ -51,18 +50,24 @@ function handle_errors {
     exit 1
 }
 
-function run_test {
+function validate {
     local k
     local v
     local actual
+    declare -A actuals
 
     echo ""
-    echo -n "verifying"
+    echo -n "verifying..."
+
+    while read -r actual; do
+        # split string 'actual' by sequence '=='
+        actuals["${actual%%==*}"]="${actual#*==}"
+    done < <(pipenv run pip freeze | grep -vE '^-e')
 
     for k in "${!versions[@]}"; do
         echo -n "."
-        v="${versions[${k}]}"
-        actual="$(pipenv run pip show "${k}" | grep -E '^Version:\s+' | sed -E 's/^Version:\s+//')"
+        v="${versions["${k}"]}"
+        actual="${actuals["${k}"]}"
 
         if test "${actual}" != "${v}"; then
             err["${k}"]="${actual}"
@@ -88,7 +93,7 @@ while :; do
     rm -rf .venv
     pipenv sync
 
-    run_test
+    validate
 
     if [[ $iter -ge $test_count ]]; then break ; fi
 done
@@ -103,7 +108,7 @@ while :; do
     rm -rf .venv Pipfile.lock
     pipenv install
 
-    run_test
+    validate
 
     if [[ $iter -ge $test_count ]]; then break ; fi
 done
