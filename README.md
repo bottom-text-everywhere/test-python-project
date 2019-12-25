@@ -1,6 +1,6 @@
 # Purpose
 
-In the course of the past few months working with pipenv I've noticed some rather annoying behavior in some edge cases where a lockfile can exist and the virtualenv that is built does not match the lockfile.
+In the course of the past few months working with pipenv I've noticed some rather annoying behavior in some edge cases where a lockfile can exist and the virtualenv that is built from a sync command does not match the lockfile.
 
 In addition I've noticed cases where constructing a lockfile yields a virtual-env that is incorrectly configured, but a lockfile that matches the intent of the Pipenv file and author.
 

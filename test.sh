@@ -65,7 +65,6 @@ function validate {
     done < <(pipenv run pip freeze | grep -vE '^-e')
 
     for k in "${!versions[@]}"; do
-        echo -n "."
         v="${versions["${k}"]}"
         actual="${actuals["${k}"]}"
 
